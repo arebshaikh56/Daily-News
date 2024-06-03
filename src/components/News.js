@@ -27,14 +27,16 @@ export class News extends Component {
         this.state={
             articles: [],
             loading:false,
-            page:1
+            page:1,
+            progress:10
         }
         document.title =  `${this.capitalizeFirstletter(this.props.category)} - NewsMonkey`
 
     }
 
     async componentDidMount(){
-        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=505445417ad64ed08dbd138e7cff9daf&page=1&pageSize=${this.props.pageSize}`
+        this.props.setProgress(0)
+        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.apikey}&page=1&pageSize=${this.props.pageSize}`
         this.setState({loading:true})
         let data = await fetch(url)
         let parsedData = await data.json()
@@ -42,10 +44,12 @@ export class News extends Component {
             totalResults : parsedData.totalResults,
             loading:false
         })
+        this.props.setProgress(100)
     }
     handlePrevPage = async ()=>{
+        this.props.setProgress(0)
         console.log("prev")
-        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=505445417ad64ed08dbd138e7cff9daf&page=${this.state.page - 1}&pagesize=${this.props.pageSize}`
+        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.apikey}&page=${this.state.page - 1}&pagesize=${this.props.pageSize}`
         this.setState({loading:true})
         let data = await fetch(url)
         let parsedData = await data.json()
@@ -54,11 +58,13 @@ export class News extends Component {
             page: this.state.page -1,
             loading:false
         })
+        this.props.setProgress(100)
     }
     handleNextPage = async() =>{
+        this.props.setProgress(0)
         console.log("next")
         if (!(this.state.page >= Math.ceil(this.state.totalResults/this.props.pageSize))) {
-            let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=505445417ad64ed08dbd138e7cff9daf&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`
+            let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.apikey}&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`
             this.setState({loading:true})
             let data = await fetch(url)
             let parsedData = await data.json()
@@ -68,12 +74,13 @@ export class News extends Component {
                 loading:false
             })
         }
+        this.props.setProgress(100)
 
     }
   render() {
     return (
       <div className='container my-3'>
-        <h1 className='text-center'>NewsMonkey - Top Headlines from {this.capitalizeFirstletter(this.props.category)}</h1>
+        <h1 className='text-center' style={{marginTop:'80px'}}>NewsMonkey - Top Headlines from {this.capitalizeFirstletter(this.props.category)}</h1>
         {this.state.loading && <Loading />}
         <div className='row' >
             {!this.state.loading && this.state.articles.map((elements)=>{
